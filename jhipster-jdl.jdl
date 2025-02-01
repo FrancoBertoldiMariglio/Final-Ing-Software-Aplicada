@@ -1,0 +1,9 @@
+entity Libro {
+    isbn Integer
+    precio Float
+    nombreAutor String
+}
+
+relationship ManyToMany {
+  Libro{users} to User with builtInEntity
+}
