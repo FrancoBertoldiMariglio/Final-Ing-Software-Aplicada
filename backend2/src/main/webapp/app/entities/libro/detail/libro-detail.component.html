@@ -1,0 +1,48 @@
+<div class="d-flex justify-content-center">
+  <div class="col-8">
+    @if (libro(); as libroRef) {
+      <div>
+        <h2 data-cy="libroDetailsHeading"><span>Libro</span></h2>
+
+        <hr />
+
+        <jhi-alert-error></jhi-alert-error>
+
+        <jhi-alert></jhi-alert>
+
+        <dl class="row-md jh-entity-details">
+          <dt><span>ID</span></dt>
+          <dd>
+            <span>{{ libroRef.id }}</span>
+          </dd>
+          <dt><span>Isbn</span></dt>
+          <dd>
+            <span>{{ libroRef.isbn }}</span>
+          </dd>
+          <dt><span>Precio</span></dt>
+          <dd>
+            <span>{{ libroRef.precio }}</span>
+          </dd>
+          <dt><span>Nombre Autor</span></dt>
+          <dd>
+            <span>{{ libroRef.nombreAutor }}</span>
+          </dd>
+          <dt><span>Users</span></dt>
+          <dd>
+            @for (users of libroRef.users; track $index; let last = $last) {
+              <span> {{ users.id }}{{ last ? '' : ', ' }} </span>
+            }
+          </dd>
+        </dl>
+
+        <button type="submit" (click)="previousState()" class="btn btn-info" data-cy="entityDetailsBackButton">
+          <fa-icon icon="arrow-left"></fa-icon>&nbsp;<span>Back</span>
+        </button>
+
+        <button type="button" [routerLink]="['/libro', libroRef.id, 'edit']" class="btn btn-primary">
+          <fa-icon icon="pencil-alt"></fa-icon>&nbsp;<span>Edit</span>
+        </button>
+      </div>
+    }
+  </div>
+</div>

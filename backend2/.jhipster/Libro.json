@@ -1,0 +1,30 @@
+{
+  "annotations": {
+    "changelogDate": "20250201205840"
+  },
+  "applications": "*",
+  "fields": [
+    {
+      "fieldName": "isbn",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "precio",
+      "fieldType": "Float"
+    },
+    {
+      "fieldName": "nombreAutor",
+      "fieldType": "String"
+    }
+  ],
+  "name": "Libro",
+  "relationships": [
+    {
+      "otherEntityName": "user",
+      "relationshipName": "users",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-many",
+      "relationshipWithBuiltInEntity": true
+    }
+  ]
+}
