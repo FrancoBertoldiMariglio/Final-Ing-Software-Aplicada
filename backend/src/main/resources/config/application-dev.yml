@@ -37,9 +37,9 @@ spring:
       indent-output: true
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:mysql://localhost:3306/BibliotecaApp?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true
-    username: biblioteca
-    password: biblioteca
+    url: jdbc:mysql://localhost:3306/${MYSQL_DATABASE}?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
     hikari:
       poolName: Hikari
       auto-commit: false
@@ -51,8 +51,7 @@ spring:
   elasticsearch:
     uris: http://localhost:9200
   liquibase:
-    # Remove 'faker' if you do not want the sample data to be loaded automatically
-    contexts: dev
+    enabled: true
   mail:
     host: localhost
     port: 25
@@ -104,8 +103,8 @@ jhipster:
     use-json-format: false # By default, logs are not in Json format
     logstash: # Forward logs to logstash over a socket, used by LoggingConfiguration
       enabled: true
-      host: localhost
-      port: 5000
+      host: logstash
+      port: 50000
       ring-buffer-size: 512
 # ===================================================================
 # Application specific properties
