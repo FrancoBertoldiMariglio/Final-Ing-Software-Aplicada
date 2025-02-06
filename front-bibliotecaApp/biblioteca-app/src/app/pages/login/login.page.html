@@ -1,0 +1,11 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Login</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-input placeholder="Usuario" [(ngModel)]="credentials.username"></ion-input>
+  <ion-input type="password" placeholder="Contraseña" [(ngModel)]="credentials.password"></ion-input>
+  <ion-button expand="full" (click)="login()">Ingresar</ion-button>
+</ion-content>

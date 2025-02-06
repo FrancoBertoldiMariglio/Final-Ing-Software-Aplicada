@@ -7,6 +7,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 /**
  * Spring Data JPA repository for the Libro entity.
@@ -29,4 +31,13 @@ public interface LibroRepository extends LibroRepositoryWithBagRelationships, Jp
     }
 
     Optional<Libro> findByIsbn(Integer isbn);
+
+    /**
+     * Finds all books associated with a specific user.
+     *
+     * @param userId the ID of the user
+     * @return list of books belonging to the user
+     */
+    @Query("SELECT l FROM Libro l JOIN l.users u WHERE u.id = :userId")
+    List<Libro> findByUserId(@Param("userId") Long userId);
 }

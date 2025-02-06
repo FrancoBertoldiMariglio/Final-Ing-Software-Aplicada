@@ -15,9 +15,16 @@
 
 logging:
   level:
-    ROOT: INFO
-    tech.jhipster: INFO
-    com.mycompany.myapp: INFO
+    ROOT: DEBUG
+    tech.jhipster: DEBUG
+    org.hibernate.SQL: DEBUG
+    com.mycompany.myapp: DEBUG
+    use-json-format: true
+    logstash:
+      enabled: false
+      host: localhost
+      port: 50000
+      ring-buffer-size: 512
 
 management:
   prometheus:
@@ -33,9 +40,9 @@ spring:
       enabled: false
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:mysql://localhost:3306/BibliotecaApp?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
+    url: jdbc:mysql://localhost:3306/BibliotecaApp?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true
     username: root
-    password:
+    password: root
     hikari:
       poolName: Hikari
       auto-commit: false
@@ -113,11 +120,11 @@ jhipster:
   mail: # specific JHipster mail property, for standard properties see MailProperties
     base-url: http://my-server-url-to-change # Modify according to your server's URL
   logging:
-    use-json-format: false # By default, logs are not in Json format
+    use-json-format: true # By default, logs are not in Json format
     logstash: # Forward logs to logstash over a socket, used by LoggingConfiguration
       enabled: false
       host: localhost
-      port: 5000
+      port: 50000
       ring-buffer-size: 512
 # ===================================================================
 # Application specific properties

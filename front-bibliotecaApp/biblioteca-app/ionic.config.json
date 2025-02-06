@@ -1,0 +1,8 @@
+{
+  "name": "BibliotecaApp",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular",
+  "id": "bb5a25d8"
+}

@@ -203,7 +203,7 @@ public class LibroResource {
      * @param query the query of the libro search.
      * @return the result of the search.
      */
-    @GetMapping("/_search")
+    @GetMapping("/search")
     public List<Libro> searchLibros(@RequestParam("query") String query) {
         LOG.debug("REST request to search Libros for query {}", query);
         try {
@@ -218,5 +218,17 @@ public class LibroResource {
         Optional<Libro> libro = libroRepository.findByIsbn(isbn);
         return libro.map(response -> ResponseEntity.ok().body(response))
             .orElse(ResponseEntity.notFound().build());
+    }
+    /**
+     * {@code GET  /libros/usuario/:userId} : get all libros for a specific user.
+     *
+     * @param userId the id of the user to get books for
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of libros in body.
+     */
+    @GetMapping("/usuario/{userId}")
+    public ResponseEntity<List<Libro>> getLibrosByUsuario(@PathVariable Long userId) {
+        LOG.debug("REST request to get Libros for User : {}", userId);
+        List<Libro> libros = libroRepository.findByUserId(userId);
+        return ResponseEntity.ok().body(libros);
     }
 }
