@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { LibroService, Libro } from '../../services/libro.service'; // Ajusta la ruta según tu estructura
+import { LibroService, Libro } from '../../services/libro.service';
+import { AuthService } from "../../auth/auth.service";
+import { Router } from "@angular/router";
 
 
 
@@ -12,7 +14,7 @@ import { LibroService, Libro } from '../../services/libro.service'; // Ajusta la
 export class MisLibrosPage implements OnInit {
   libros: Libro[] = [];
 
-  constructor(private libroService: LibroService) { }
+  constructor(private libroService: LibroService, private authService: AuthService, private router: Router) { }
 
   ngOnInit() {
     const userId = 1; // Por ahora hardcodeamos el userId
@@ -24,5 +26,10 @@ export class MisLibrosPage implements OnInit {
         console.error('Error al cargar los libros:', error);
       }
     });
+  }
+
+  cerrarSesion() {
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 }

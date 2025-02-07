@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { LibroService } from 'src/app/services/libro.service';
+import { AuthService } from "../../auth/auth.service";
+import { Router } from "@angular/router";
 
 @Component({
   selector: 'app-libros',
@@ -10,7 +12,7 @@ import { LibroService } from 'src/app/services/libro.service';
 export class LibrosPage implements OnInit {
   libros: any[] = [];
 
-  constructor(private libroService: LibroService) {}
+  constructor(private libroService: LibroService, private authService: AuthService, private router: Router) {}
 
   ngOnInit() {
     this.libroService.getLibros().subscribe((data: any) => {
@@ -18,9 +20,14 @@ export class LibrosPage implements OnInit {
     });
   }
 
-  adquirir(libroId: number) {
-    this.libroService.adquirirLibro(libroId).subscribe(() => {
+  adquirir(isbn: number) {
+    this.libroService.adquirirLibro(isbn).subscribe(() => {
       alert('Libro adquirido!');
     });
+  }
+
+  cerrarSesion() {
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 }

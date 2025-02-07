@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from "rxjs";
+import { environment } from 'src/environments/environment';
 
 export interface Libro {
   id: number;
@@ -8,11 +9,12 @@ export interface Libro {
   precio: number;
   nombreAutor: string;
 }
+
 @Injectable({
   providedIn: 'root'
 })
 export class LibroService {
-  private apiUrl = 'https:///api/libros';
+  private apiUrl = `${environment.apiUrl}/api/libros`;
 
   constructor(private http: HttpClient) {}
 
@@ -20,11 +22,11 @@ export class LibroService {
     return this.http.get(this.apiUrl);
   }
 
-  adquirirLibro(libroId: number) {
-    return this.http.post(`${this.apiUrl}/${libroId}/adquirir`, {});
+  adquirirLibro(isbn: number) {
+    return this.http.post(`${this.apiUrl}/isbn/${isbn}`, {});
   }
 
   getLibrosByUser(userId: number): Observable<Libro[]> {
-  return this.http.get<Libro[]>(`${this.apiUrl}/usuario/${userId}`);
-}
+    return this.http.get<Libro[]>(`${this.apiUrl}/usuario/${userId}`);
+  }
 }

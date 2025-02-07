@@ -16,7 +16,7 @@ RUN npm install
 COPY . .
 
 # Construir la aplicación
-RUN ionic build --prod
+RUN ionic build --configuration=development
 
 # Configurar nginx para servir la aplicación
 FROM nginx:alpine

@@ -3,12 +3,13 @@ import { HttpClient } from '@angular/common/http';
 import { Storage } from '@ionic/storage-angular';
 import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:8080/authenticate';
+  private apiUrl = `${environment.apiUrl}/api/authenticate`;
   private _storage: Storage | null = null;
   private _initialized = false;
   private authState = new BehaviorSubject<boolean>(false);
@@ -22,15 +23,11 @@ export class AuthService {
   }
 
   async init() {
-    if (this._initialized) {
-      return;
-    }
-
+    if (this._initialized) return;
     const storage = await this.storage.create();
     this._storage = storage;
     this._initialized = true;
 
-    // Verificar el estado de autenticación al inicio
     const token = await this.getToken();
     this.authState.next(!!token);
   }
@@ -54,12 +51,12 @@ export class AuthService {
   }
 
   async getToken(): Promise<string | null> {
-    await this.init(); // Asegurarse de que storage está inicializado
+    await this.init();
     return await this._storage?.get('token') || null;
   }
 
   async isLoggedIn(): Promise<boolean> {
-    await this.init(); // Asegurarse de que storage está inicializado
+    await this.init();
     const token = await this.getToken();
     return !!token;
   }

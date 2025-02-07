@@ -1,6 +1,14 @@
 <ion-header>
   <ion-toolbar>
     <ion-title>Libros</ion-title>
+    <ion-buttons slot="end">
+      <ion-button routerLink="/mis-libros">
+        Mis Libros
+      </ion-button>
+      <ion-button (click)="cerrarSesion()">
+        <ion-icon name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -11,7 +19,7 @@
         <h2>{{ libro.nombreAutor }}</h2>
         <p>ISBN: {{ libro.isbn }} - Precio: ${{ libro.precio }}</p>
       </ion-label>
-      <ion-button (click)="adquirir(libro.id)">Adquirir</ion-button>
+      <ion-button (click)="adquirir(libro.isbn)">Adquirir</ion-button>
     </ion-item>
   </ion-list>
 </ion-content>

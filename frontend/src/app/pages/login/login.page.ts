@@ -26,10 +26,10 @@ export class LoginPage {
     await loading.present();
 
     try {
-      // await this.authService.login(this.credentials);
-      // await loading.dismiss();
+      await this.authService.login(this.credentials);
       await loading.dismiss();
-      await this.router.navigate(['/mis-libros']);
+      await loading.dismiss();
+      await this.router.navigate(['/libros']);
     } catch (error) {
       await loading.dismiss();
       const toast = await this.toastCtrl.create({
