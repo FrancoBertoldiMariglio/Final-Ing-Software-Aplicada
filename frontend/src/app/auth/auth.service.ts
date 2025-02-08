@@ -67,6 +67,26 @@ export class AuthService {
     }
   }
 
+  private decodeToken(token: string): any {
+    try {
+      const payload = token.split('.')[1];
+      const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+      return JSON.parse(window.atob(base64));
+    } catch (e) {
+      console.error('Error decodificando token:', e);
+      return null;
+    }
+  }
+
+  async getUserIdFromToken(): Promise<number | null> {
+    const token = this._storage?.get('token');
+    if (token) {
+      const decodedToken = this.decodeToken(await token);
+      return decodedToken?.userId || null;
+    }
+    return null;
+  }
+
   async getToken(): Promise<string | null> {
     await this.init();
     return await this._storage?.get('token') || null;

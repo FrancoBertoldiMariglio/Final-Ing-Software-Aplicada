@@ -228,18 +228,15 @@ public class LibroResource {
     ) {
         LOG.debug("REST request to associate Libro with ISBN: {} to User: {}", isbn, userId);
 
-        Optional<Libro> libroOpt = libroRepository.findByIsbn(isbn);
-        Optional<User> userOpt = userRepository.findById(userId);
+        Libro libro = libroRepository.findByIsbn(isbn)
+            .orElseThrow(() -> new BadRequestAlertException("Libro no encontrado", ENTITY_NAME, "libronotfound"));
 
-        if (libroOpt.isPresent() && userOpt.isPresent()) {
-            Libro libro = libroOpt.get();
-            User user = userOpt.get();
-            libro.addUsers(user);
-            libroRepository.save(libro);
-            return ResponseEntity.ok().body(libro);
-        }
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new BadRequestAlertException("Usuario no encontrado", ENTITY_NAME, "usernotfound"));
 
-        return ResponseEntity.notFound().build();
+        libro.addUsers(user);
+        libroRepository.save(libro);
+        return ResponseEntity.ok().body(libro);
     }
     /**
      * {@code GET  /libros/usuario/:userId} : get all libros for a specific user.

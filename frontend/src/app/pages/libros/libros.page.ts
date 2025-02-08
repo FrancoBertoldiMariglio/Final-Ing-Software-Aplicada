@@ -44,10 +44,14 @@ export class LibrosPage implements OnInit {
     });
   }
 
-  adquirir(isbn: number) {
-    this.libroService.adquirirLibro(isbn).subscribe(() => {
+  async adquirir(isbn: number) {
+    try {
+      await this.libroService.adquirirLibro(isbn);
       alert('Libro adquirido!');
-    });
+    } catch (error) {
+      console.error('Error al adquirir libro:', error);
+      alert('Error al adquirir el libro');
+    }
   }
 
   cerrarSesion() {
