@@ -3,13 +3,12 @@ import { HttpClient } from '@angular/common/http';
 import { Storage } from '@ionic/storage-angular';
 import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
-import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = `${environment.apiUrl}/api/authenticate`;
+  private apiUrl = `/api/authenticate`;
   private _storage: Storage | null = null;
   private _initialized = false;
   private authState = new BehaviorSubject<boolean>(false);
@@ -33,21 +32,39 @@ export class AuthService {
   }
 
   login(credentials: { username: string; password: string }) {
-    return this.http.post(this.apiUrl, credentials).toPromise()
-      .then(async (res: any) => {
-        if (res && res.id_token) {
-          await this._storage?.set('token', res.id_token);
-          this.authState.next(true);
-          return res;
-        }
-        throw new Error('Token no recibido');
-      });
+  return this.http.post(this.apiUrl, credentials).toPromise()
+    .then(async (res: any) => {
+      if (res && res.id_token) {
+        await this._storage?.set('token', res.id_token);
+        this.authState.next(true);
+        console.log('Token guardado:', res.id_token);
+        return res;
+      }
+      throw new Error('Token no recibido');
+    });
   }
 
   async logout() {
-    await this._storage?.remove('token');
-    this.authState.next(false);
-    this.router.navigate(['/login']);
+    try {
+      await this._storage?.remove('token');
+
+      const tokenCheck = await this._storage?.get('token');
+      if (tokenCheck) {
+        console.error('Error: Token no se eliminó correctamente');
+        await this._storage?.clear();
+      }
+
+      this.authState.next(false);
+
+      await this._storage?.clear();
+
+      await this.router.navigate(['/login']);
+    } catch (error) {
+      console.error('Error durante el logout:', error);
+      await this._storage?.clear();
+      this.authState.next(false);
+      await this.router.navigate(['/login']);
+    }
   }
 
   async getToken(): Promise<string | null> {

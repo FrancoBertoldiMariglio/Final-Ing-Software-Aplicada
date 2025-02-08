@@ -14,7 +14,7 @@ export interface Libro {
   providedIn: 'root'
 })
 export class LibroService {
-  private apiUrl = `${environment.apiUrl}/api/libros`;
+  private apiUrl = `/api/libros`;
 
   constructor(private http: HttpClient) {}
 

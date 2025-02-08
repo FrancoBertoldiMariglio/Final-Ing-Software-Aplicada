@@ -11,12 +11,36 @@ import { Router } from "@angular/router";
 })
 export class LibrosPage implements OnInit {
   libros: any[] = [];
+  librosFiltrados: any[] = [];
+  filtroNombre: string = '';
+  filtroIsbn: string = '';
 
-  constructor(private libroService: LibroService, private authService: AuthService, private router: Router) {}
+  constructor(
+    private libroService: LibroService,
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
   ngOnInit() {
+    this.cargarLibros();
+  }
+
+  cargarLibros() {
     this.libroService.getLibros().subscribe((data: any) => {
       this.libros = data;
+      this.aplicarFiltros();
+    });
+  }
+
+  aplicarFiltros() {
+    this.librosFiltrados = this.libros.filter(libro => {
+      const cumpleNombre = !this.filtroNombre ||
+        libro.nombreAutor.toLowerCase().includes(this.filtroNombre.toLowerCase());
+
+      const cumpleIsbn = !this.filtroIsbn ||
+        libro.isbn.toString().includes(this.filtroIsbn);
+
+      return cumpleNombre && cumpleIsbn;
     });
   }
 

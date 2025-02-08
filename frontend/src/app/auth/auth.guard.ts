@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, Router } from '@angular/router';
+import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot } from '@angular/router';
 import { AuthService } from './auth.service';
 
 @Injectable({
@@ -8,17 +8,31 @@ import { AuthService } from './auth.service';
 export class AuthGuard implements CanActivate {
   constructor(private authService: AuthService, private router: Router) {}
 
-  async canActivate(): Promise<boolean> {
+  async canActivate(
+    route: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot
+  ): Promise<boolean> {
     try {
       const isAuth = await this.authService.isLoggedIn();
+
       if (!isAuth) {
-        await this.router.navigate(['/login']);
+        const redirectUrl = state.url;
+        await this.router.navigate(['/login'], {
+          queryParams: { returnUrl: redirectUrl }
+        });
         return false;
       }
+
+      const token = await this.authService.getToken();
+      if (!token) {
+        await this.authService.logout();
+        return false;
+      }
+
       return true;
     } catch (error) {
       console.error('Error en AuthGuard:', error);
-      await this.router.navigate(['/login']);
+      await this.authService.logout();
       return false;
     }
   }

@@ -6,26 +6,22 @@ WORKDIR /app
 # Instalar dependencias globales
 RUN npm install -g @ionic/cli
 
-# Copiar package.json y package-lock.json
 COPY package*.json ./
-
-# Instalar dependencias del proyecto
 RUN npm install
-
-# Copiar el resto del código fuente
 COPY . .
+RUN npm run build --configuration=production
 
-# Construir la aplicación
-RUN ionic build --configuration=development
-
-# Configurar nginx para servir la aplicación
 FROM nginx:alpine
 
-# Copiar la configuración personalizada de nginx si es necesaria
+# Copiar la configuración de nginx
 COPY nginx.conf /etc/nginx/nginx.conf
 
-# Copiar los archivos construidos desde la etapa anterior
+# Copiar los archivos construidos
 COPY --from=builder /app/www /usr/share/nginx/html
+
+# Copiar y hacer ejecutable el script de entorno
+COPY env.sh /docker-entrypoint.d/40-env.sh
+RUN chmod +x /docker-entrypoint.d/40-env.sh
 
 EXPOSE 80
 

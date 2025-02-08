@@ -1,7 +1,9 @@
 package com.mycompany.myapp.web.rest;
 
 import com.mycompany.myapp.domain.Libro;
+import com.mycompany.myapp.domain.User;
 import com.mycompany.myapp.repository.LibroRepository;
+import com.mycompany.myapp.repository.UserRepository;
 import com.mycompany.myapp.repository.search.LibroSearchRepository;
 import com.mycompany.myapp.web.rest.errors.BadRequestAlertException;
 import com.mycompany.myapp.web.rest.errors.ElasticsearchExceptionMapper;
@@ -31,6 +33,7 @@ public class LibroResource {
     private static final Logger LOG = LoggerFactory.getLogger(LibroResource.class);
 
     private static final String ENTITY_NAME = "libro";
+    private final UserRepository userRepository;
 
     @Value("${jhipster.clientApp.name}")
     private String applicationName;
@@ -39,9 +42,14 @@ public class LibroResource {
 
     private final LibroSearchRepository libroSearchRepository;
 
-    public LibroResource(LibroRepository libroRepository, LibroSearchRepository libroSearchRepository) {
+    public LibroResource(
+        LibroRepository libroRepository,
+        LibroSearchRepository libroSearchRepository,
+        UserRepository userRepository
+    ) {
         this.libroRepository = libroRepository;
         this.libroSearchRepository = libroSearchRepository;
+        this.userRepository = userRepository;
     }
 
     /**
@@ -213,11 +221,25 @@ public class LibroResource {
         }
     }
 
-    @GetMapping("/isbn/{isbn}")
-    public ResponseEntity<Libro> getLibroByIsbn(@PathVariable Integer isbn) {
-        Optional<Libro> libro = libroRepository.findByIsbn(isbn);
-        return libro.map(response -> ResponseEntity.ok().body(response))
-            .orElse(ResponseEntity.notFound().build());
+    @PostMapping("/isbn/{isbn}")
+    public ResponseEntity<Libro> asociarLibroAUsuario(
+        @PathVariable Integer isbn,
+        @RequestParam Long userId
+    ) {
+        LOG.debug("REST request to associate Libro with ISBN: {} to User: {}", isbn, userId);
+
+        Optional<Libro> libroOpt = libroRepository.findByIsbn(isbn);
+        Optional<User> userOpt = userRepository.findById(userId);
+
+        if (libroOpt.isPresent() && userOpt.isPresent()) {
+            Libro libro = libroOpt.get();
+            User user = userOpt.get();
+            libro.addUsers(user);
+            libroRepository.save(libro);
+            return ResponseEntity.ok().body(libro);
+        }
+
+        return ResponseEntity.notFound().build();
     }
     /**
      * {@code GET  /libros/usuario/:userId} : get all libros for a specific user.

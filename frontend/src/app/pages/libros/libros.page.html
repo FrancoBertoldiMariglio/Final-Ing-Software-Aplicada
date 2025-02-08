@@ -13,8 +13,26 @@
 </ion-header>
 
 <ion-content class="ion-padding">
+  <!-- Añadimos los filtros -->
+  <ion-grid>
+    <ion-row>
+      <ion-col size="6">
+        <ion-item>
+          <ion-label position="floating">Buscar por nombre</ion-label>
+          <ion-input [(ngModel)]="filtroNombre" (ionChange)="aplicarFiltros()"></ion-input>
+        </ion-item>
+      </ion-col>
+      <ion-col size="6">
+        <ion-item>
+          <ion-label position="floating">Buscar por ISBN</ion-label>
+          <ion-input type="number" [(ngModel)]="filtroIsbn" (ionChange)="aplicarFiltros()"></ion-input>
+        </ion-item>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
   <ion-list>
-    <ion-item *ngFor="let libro of libros">
+    <ion-item *ngFor="let libro of librosFiltrados">
       <ion-label>
         <h2>{{ libro.nombreAutor }}</h2>
         <p>ISBN: {{ libro.isbn }} - Precio: ${{ libro.precio }}</p>

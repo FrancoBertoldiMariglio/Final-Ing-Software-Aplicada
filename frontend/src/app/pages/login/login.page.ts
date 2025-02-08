@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { AuthService } from 'src/app/auth/auth.service';
-import { Router } from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import { LoadingController, ToastController } from '@ionic/angular';
 
 @Component({
@@ -16,7 +16,8 @@ export class LoginPage {
     private authService: AuthService,
     private router: Router,
     private loadingCtrl: LoadingController,
-    private toastCtrl: ToastController
+    private toastCtrl: ToastController,
+    private route: ActivatedRoute
   ) {}
 
   async login() {
@@ -27,9 +28,9 @@ export class LoginPage {
 
     try {
       await this.authService.login(this.credentials);
+      const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/libros';
       await loading.dismiss();
-      await loading.dismiss();
-      await this.router.navigate(['/libros']);
+      await this.router.navigate([returnUrl]);
     } catch (error) {
       await loading.dismiss();
       const toast = await this.toastCtrl.create({
