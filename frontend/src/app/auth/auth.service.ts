@@ -2,8 +2,12 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Storage } from '@ionic/storage-angular';
 import { Router } from '@angular/router';
-import { BehaviorSubject, from, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { BehaviorSubject } from 'rxjs';
+
+interface PendingLogin {
+  credentials: { username: string; password: string };
+  timestamp: number;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +17,6 @@ export class AuthService {
   private _storage: Storage | null = null;
   private _initialized = false;
   private authState = new BehaviorSubject<boolean>(false);
-  private networkStatus = new BehaviorSubject<boolean>(navigator.onLine);
 
   constructor(
     private http: HttpClient,
@@ -21,12 +24,6 @@ export class AuthService {
     private router: Router
   ) {
     this.init();
-    this.setupNetworkListeners();
-  }
-
-  private setupNetworkListeners() {
-    window.addEventListener('online', () => this.networkStatus.next(true));
-    window.addEventListener('offline', () => this.networkStatus.next(false));
   }
 
   async init() {
@@ -41,7 +38,7 @@ export class AuthService {
 
   login(credentials: { username: string; password: string }) {
     if (!navigator.onLine) {
-      return Promise.reject(new Error('No hay conexión a internet'));
+      return this.handleOfflineLogin(credentials);
     }
 
     return this.http.post(this.apiUrl, credentials).toPromise()
@@ -49,7 +46,6 @@ export class AuthService {
         if (res && res.id_token) {
           await this._storage?.set('token', res.id_token);
           this.authState.next(true);
-          console.log('Token guardado:', res.id_token);
           return res;
         }
         throw new Error('Token no recibido');
@@ -62,20 +58,24 @@ export class AuthService {
       });
   }
 
+  private async handleOfflineLogin(credentials: { username: string; password: string }) {
+    const currentPath = window.location.pathname;
+    if (currentPath === '/login') {
+      const pendingLogin: PendingLogin = {
+        credentials,
+        timestamp: Date.now()
+      };
+      await this._storage?.set('pendingLogin', pendingLogin);
+      throw new Error('Sin conexión en login');
+    }
+    throw new Error('Sin conexión');
+  }
+
   async logout() {
     try {
       await this._storage?.remove('token');
-
-      const tokenCheck = await this._storage?.get('token');
-      if (tokenCheck) {
-        console.error('Error: Token no se eliminó correctamente');
-        await this._storage?.clear();
-      }
-
+      await this._storage?.remove('pendingLogin');
       this.authState.next(false);
-
-      await this._storage?.clear();
-
       await this.router.navigate(['/login']);
     } catch (error) {
       console.error('Error durante el logout:', error);
@@ -116,11 +116,15 @@ export class AuthService {
     return !!token;
   }
 
-  isOnline(): boolean {
-    return navigator.onLine;
-  }
-
-  getNetworkStatus() {
-    return this.networkStatus.asObservable();
+  async checkPendingLogin(): Promise<PendingLogin | null> {
+    const pendingLogin = await this._storage?.get('pendingLogin') as PendingLogin;
+    if (pendingLogin) {
+      const fiveMinutes = 5 * 60 * 1000;
+      if (Date.now() - pendingLogin.timestamp < fiveMinutes) {
+        return pendingLogin;
+      }
+      await this._storage?.remove('pendingLogin');
+    }
+    return null;
   }
 }

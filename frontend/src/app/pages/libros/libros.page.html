@@ -1,6 +1,10 @@
 <ion-header>
   <ion-toolbar>
     <ion-title>Libros</ion-title>
+    <ion-chip slot="end" [color]="isOnline ? 'success' : 'warning'" *ngIf="!isOnline">
+      <ion-icon [name]="isOnline ? 'wifi' : 'wifi-outline'"></ion-icon>
+      <ion-label>{{isOnline ? 'Conectado' : 'Sin conexión'}}</ion-label>
+    </ion-chip>
     <ion-buttons slot="end">
       <ion-button routerLink="/mis-libros">
         Mis Libros
@@ -37,7 +41,30 @@
         <h2>{{ libro.nombreAutor }}</h2>
         <p>ISBN: {{ libro.isbn }} - Precio: ${{ libro.precio }}</p>
       </ion-label>
-      <ion-button (click)="adquirir(libro.isbn)">Adquirir</ion-button>
+      <ion-button
+        (click)="adquirir(libro.isbn)"
+        [color]="isOnline ? 'primary' : 'warning'">
+        <ion-icon
+          [name]="isOnline ? 'cart-outline' : 'cloud-offline-outline'"
+          slot="start">
+        </ion-icon>
+        {{ isOnline ? 'Adquirir' : 'Adquirir offline' }}
+      </ion-button>
     </ion-item>
   </ion-list>
+
+  <!-- Mensaje cuando no hay conexión -->
+  <ion-item *ngIf="!isOnline" lines="none" color="warning">
+    <ion-icon name="warning-outline" slot="start"></ion-icon>
+    <ion-label class="ion-text-wrap">
+      Estás en modo sin conexión. Los libros que adquieras se procesarán automáticamente cuando se restaure la conexión.
+    </ion-label>
+  </ion-item>
+
+  <!-- Mensaje cuando no hay resultados -->
+  <ion-item *ngIf="librosFiltrados.length === 0" lines="none">
+    <ion-label class="ion-text-center">
+      No se encontraron libros con los filtros aplicados
+    </ion-label>
+  </ion-item>
 </ion-content>

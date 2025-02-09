@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { LibroService } from 'src/app/services/libro.service';
 import { AuthService } from "../../auth/auth.service";
 import { Router } from "@angular/router";
+import { ToastController } from '@ionic/angular';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-libros',
@@ -9,27 +11,56 @@ import { Router } from "@angular/router";
   styleUrls: ['./libros.page.scss'],
   standalone: false
 })
-export class LibrosPage implements OnInit {
+export class LibrosPage implements OnInit, OnDestroy {
   libros: any[] = [];
   librosFiltrados: any[] = [];
   filtroNombre: string = '';
   filtroIsbn: string = '';
+  isOnline = navigator.onLine;
+  private onlineSubscription?: Subscription;
 
   constructor(
     private libroService: LibroService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private toastCtrl: ToastController
   ) {}
 
   ngOnInit() {
+    this.isOnline = navigator.onLine;
     this.cargarLibros();
+    this.onlineSubscription = this.libroService.getIsOnline().subscribe(
+      online => {
+        if (this.isOnline !== online) {
+          this.isOnline = online;
+          this.mostrarMensajeConexion(online);
+        }
+      }
+    );
+  }
+
+  private async mostrarMensajeConexion(online: boolean) {
+    if (this.router.url === '/libros') {
+      const toast = await this.toastCtrl.create({
+        message: online ? 'Conexión restaurada' : 'Sin conexión',
+        duration: 2000,
+        position: 'top',
+        color: online ? 'success' : 'warning'
+      });
+      toast.present();
+    }
   }
 
   cargarLibros() {
-    this.libroService.getLibros().subscribe((data: any) => {
-      this.libros = data;
-      this.aplicarFiltros();
-    });
+    this.libroService.getLibros().subscribe(
+      (data: any) => {
+        this.libros = data;
+        this.aplicarFiltros();
+      },
+      error => {
+        console.error('Error cargando libros:', error);
+      }
+    );
   }
 
   aplicarFiltros() {
@@ -47,15 +78,32 @@ export class LibrosPage implements OnInit {
   async adquirir(isbn: number) {
     try {
       await this.libroService.adquirirLibro(isbn);
-      alert('Libro adquirido!');
-    } catch (error) {
-      console.error('Error al adquirir libro:', error);
-      alert('Error al adquirir el libro');
+      const toast = await this.toastCtrl.create({
+        message: 'Libro adquirido con éxito',
+        duration: 2000,
+        color: 'success'
+      });
+      toast.present();
+    } catch (error: any) {
+      const toast = await this.toastCtrl.create({
+        message: error.message === 'OFFLINE'
+          ? 'Libro guardado para adquirir cuando se restaure la conexión'
+          : 'Error al adquirir el libro',
+        duration: 3000,
+        color: error.message === 'OFFLINE' ? 'warning' : 'danger'
+      });
+      toast.present();
     }
   }
 
   cerrarSesion() {
     this.authService.logout();
     this.router.navigate(['/login']);
+  }
+
+  ngOnDestroy() {
+    if (this.onlineSubscription) {
+      this.onlineSubscription.unsubscribe();
+    }
   }
 }
