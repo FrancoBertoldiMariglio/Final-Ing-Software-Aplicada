@@ -1,0 +1,16 @@
+filebeat.inputs:
+- type: container
+  enabled: true
+  paths:
+    - '/var/jenkins_home/jobs/*/builds/*/log'
+    - '/var/jenkins_home/logs/*.log'
+
+output.logstash:
+  hosts: ["logstash:5044"]
+
+logging.level: info
+logging.to_files: true
+logging.files:
+  path: /var/log/filebeat
+  name: filebeat
+  keepfiles: 7

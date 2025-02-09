@@ -146,7 +146,9 @@ services:
       - backend
 
   jenkins:
-    image: jenkins/jenkins:lts-jdk17
+    build:
+      context: ./jenkins
+      dockerfile: Dockerfile
     container_name: jenkins
     user: root
     environment:
@@ -157,6 +159,7 @@ services:
     volumes:
       - jenkins_home:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
+      - ../backend:/var/jenkins_home/workspace/backend
     networks:
       - shared-network
     privileged: true
