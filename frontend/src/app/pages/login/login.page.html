@@ -1,11 +1,47 @@
 <ion-header>
   <ion-toolbar>
     <ion-title>Login</ion-title>
+    <ion-chip slot="end" [color]="isOnline ? 'success' : 'warning'" *ngIf="!isOnline">
+      <ion-icon [name]="isOnline ? 'wifi' : 'wifi-outline'"></ion-icon>
+      <ion-label>{{isOnline ? 'Conectado' : 'Sin conexión'}}</ion-label>
+    </ion-chip>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
-  <ion-input placeholder="Usuario" [(ngModel)]="credentials.username"></ion-input>
-  <ion-input type="password" placeholder="Contraseña" [(ngModel)]="credentials.password"></ion-input>
-  <ion-button expand="full" (click)="login()">Ingresar</ion-button>
+  <form (ngSubmit)="login()">
+    <ion-list>
+      <ion-item>
+        <ion-label position="floating">Usuario</ion-label>
+        <ion-input
+          [(ngModel)]="credentials.username"
+          name="username"
+          required>
+        </ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="floating">Contraseña</ion-label>
+        <ion-input
+          type="password"
+          [(ngModel)]="credentials.password"
+          name="password"
+          required>
+        </ion-input>
+      </ion-item>
+    </ion-list>
+
+    <div class="ion-padding">
+      <ion-button
+        expand="block"
+        type="submit"
+        [disabled]="!isOnline || !credentials.username || !credentials.password">
+        <ion-icon
+          [name]="isOnline ? 'log-in' : 'wifi-outline'"
+          slot="start">
+        </ion-icon>
+        {{isOnline ? 'Ingresar' : 'Sin conexión'}}
+      </ion-button>
+    </div>
+  </form>
 </ion-content>

@@ -1,5 +1,5 @@
 # Frontend (Ionic/Angular) Dockerfile
-FROM node:18-alpine as builder
+FROM node:20-alpine as builder
 
 WORKDIR /app
 
@@ -7,7 +7,9 @@ WORKDIR /app
 RUN npm install -g @ionic/cli
 
 COPY package*.json ./
-RUN npm install
+RUN npm install @angular/pwa @angular/service-worker --force
+RUN npm install --force
+
 COPY . .
 RUN npm run build --configuration=production
 

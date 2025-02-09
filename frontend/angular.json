@@ -30,10 +30,13 @@
                 "glob": "**/*.svg",
                 "input": "node_modules/ionicons/dist/ionicons/svg",
                 "output": "./svg"
-              }
+              },
+              "src/manifest.webmanifest"
             ],
             "styles": ["src/global.scss", "src/theme/variables.scss"],
-            "scripts": []
+            "scripts": [],
+            "serviceWorker": true,
+            "ngswConfigPath": "ngsw-config.json"
           },
           "configurations": {
             "production": {
@@ -101,17 +104,18 @@
             "karmaConfig": "karma.conf.js",
             "inlineStyleLanguage": "scss",
             "assets": [
-              {
-                "glob": "**/*",
-                "input": "src/assets",
-                "output": "assets"
-              },
-              {
-                "glob": "**/*.svg",
-                "input": "node_modules/ionicons/dist/ionicons/svg",
-                "output": "./svg"
-              }
-            ],
+            {
+              "glob": "**/*",
+              "input": "src/assets",
+              "output": "assets"
+            },
+            {
+              "glob": "**/*.svg",
+              "input": "node_modules/ionicons/dist/ionicons/svg",
+              "output": "./svg"
+            },
+            "src/manifest.webmanifest"
+          ],
             "styles": ["src/global.scss", "src/theme/variables.scss"],
             "scripts": []
           },
