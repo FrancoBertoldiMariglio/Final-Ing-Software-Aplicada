@@ -80,9 +80,9 @@ pipeline {
             }
         }
     }
-
-    post {
-        always {
+post {
+    always {
+        node {
             sh 'docker logout'
             // Limpieza de imágenes
             sh """
@@ -90,11 +90,16 @@ pipeline {
                 docker rmi ${DOCKER_IMAGE}:latest || true
             """
         }
-        success {
+    }
+    success {
+        node {
             echo 'Pipeline ejecutado exitosamente'
         }
-        failure {
+    }
+    failure {
+        node {
             echo 'El pipeline ha fallado'
         }
     }
 }
+
