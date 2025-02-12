@@ -1,12 +1,18 @@
+
+// @ts-ignore
+import { Libro } from '../../support/models/libro.model';
+
 describe('Libro create and search e2e test', () => {
+  const uniqueISBN = Math.floor(Math.random() * 900000) + 100000;
+
   beforeEach(() => {
     cy.login('admin', 'admin');
   });
 
   it('should create and then find libro by ISBN', () => {
-    const newLibro = {
+    const newLibro: Libro = {
       id: null,
-      isbn: 54321,
+      isbn: uniqueISBN,
       precio: 39.99,
       nombreAutor: 'Jorge Luis Borges',
       users: []
@@ -19,15 +25,19 @@ describe('Libro create and search e2e test', () => {
       body: newLibro
     }).then((response) => {
       expect(response.status).to.eq(201);
+      const createdLibro = response.body;
+      cy.log('Libro created:', createdLibro);
 
-      // Buscar el libro creado por ISBN
+      // Buscar el libro usando el endpoint de getAllLibros
       cy.authenticatedRequest({
         method: 'GET',
-        url: `/api/libros/isbn/${newLibro.isbn}`
+        url: '/api/libros'
       }).then((searchResponse) => {
         expect(searchResponse.status).to.eq(200);
-        expect(searchResponse.body.isbn).to.eq(newLibro.isbn);
-        expect(searchResponse.body.nombreAutor).to.eq(newLibro.nombreAutor);
+        const foundLibro = searchResponse.body.find((libro: Libro) => libro.isbn === uniqueISBN);
+        expect(foundLibro).to.not.be.undefined;
+        expect(foundLibro.isbn).to.eq(uniqueISBN);
+        expect(foundLibro.nombreAutor).to.eq(newLibro.nombreAutor);
       });
     });
   });

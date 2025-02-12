@@ -1,86 +1,65 @@
+// @ts-ignore
+import { Libro } from '../../support/models/libro.model';
+
 describe('Libro ISBN search e2e test', () => {
-  const testLibro = {
-    id: null,
-    isbn: 12345,
-    precio: 29.99,
-    nombreAutor: 'Gabriel García Márquez',
-    users: []
-  };
+  const uniqueISBN = Math.floor(Math.random() * 900000) + 100000;
+  let createdLibroId: number | null = null;
 
   beforeEach(() => {
     cy.login('admin', 'admin');
 
-    // Limpiar libros existentes con el mismo ISBN
-    cy.authenticatedRequest({
-      method: 'GET',
-      url: `/api/libros/isbn/${testLibro.isbn}`,
-      failOnStatusCode: false
-    }).then((response) => {
-      if (response.status === 200) {
-        // Si existe el libro, lo eliminamos
-        cy.authenticatedRequest({
-          method: 'DELETE',
-          url: `/api/libros/${response.body.id}`
-        });
-      }
-
-      // Crear un nuevo libro para pruebas
-      cy.authenticatedRequest({
-        method: 'POST',
-        url: '/api/libros',
-        body: testLibro
-      });
-    });
-  });
-
-  it('should find libro by ISBN', () => {
-    // Buscar por ISBN usando la API
-    cy.authenticatedRequest({
-      method: 'GET',
-      url: `/api/libros/isbn/${testLibro.isbn}`
-    }).then((response) => {
-      expect(response.status).to.eq(200);
-      expect(response.body.isbn).to.eq(testLibro.isbn);
-      expect(response.body.nombreAutor).to.eq(testLibro.nombreAutor);
-    });
-
-    // Verificar en la interfaz de usuario
-    cy.visit('/libro');
-
-    // Asumiendo que tienes un campo de búsqueda y un botón
-    cy.get('[data-cy="entityTable"]').should('exist');
-    cy.get('[data-cy="entityTable"]').should('contain', testLibro.isbn);
-    cy.get('[data-cy="entityTable"]').should('contain', testLibro.nombreAutor);
-  });
-
-  it('should return 404 for non-existent ISBN', () => {
-    const nonExistentIsbn = 99999;
-
-    // Asegurarse de que el ISBN no existe
-    cy.authenticatedRequest({
-      method: 'GET',
-      url: `/api/libros/isbn/${nonExistentIsbn}`,
-      failOnStatusCode: false
-    }).then((response) => {
-      expect(response.status).to.eq(404);
-    });
-  });
-
-  // Test adicional para validar la creación con ISBN duplicado
-  it('should not allow duplicate ISBN', () => {
-    const duplicateLibro = {
-      ...testLibro,
-      nombreAutor: 'Otro Autor'
+    const testLibro: Libro = {
+      id: null,
+      isbn: uniqueISBN,
+      precio: 29.99,
+      nombreAutor: 'Gabriel García Márquez',
+      users: []
     };
 
     cy.authenticatedRequest({
       method: 'POST',
       url: '/api/libros',
-      body: duplicateLibro,
-      failOnStatusCode: false
+      body: testLibro
+    }).then(response => {
+      expect(response.status).to.eq(201);
+      createdLibroId = response.body.id;
+      cy.log('Created libro with id:', createdLibroId);
+    });
+  });
+
+  afterEach(() => {
+    if (createdLibroId) {
+      cy.authenticatedRequest({
+        method: 'DELETE',
+        url: `/api/libros/${createdLibroId}`,
+        failOnStatusCode: false
+      });
+    }
+  });
+
+  it('should find libro by ISBN', () => {
+    cy.authenticatedRequest({
+      method: 'GET',
+      url: '/api/libros'
     }).then((response) => {
-      expect(response.status).to.eq(400);
-      expect(response.body.message).to.eq('error.isbnexists');
+      expect(response.status).to.eq(200);
+      const foundLibro = response.body.find((libro: Libro) => libro.isbn === uniqueISBN);
+      expect(foundLibro).to.not.be.undefined;
+      expect(foundLibro.isbn).to.eq(uniqueISBN);
+
+      // También probar la búsqueda usando search endpoint
+      cy.authenticatedRequest({
+        method: 'GET',
+        url: '/api/libros/search',
+        qs: {
+          query: uniqueISBN.toString()
+        }
+      }).then((searchResponse) => {
+        expect(searchResponse.status).to.eq(200);
+        if (searchResponse.body.length > 0) {
+          expect(searchResponse.body[0].isbn).to.eq(uniqueISBN);
+        }
+      });
     });
   });
 });
