@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub')
-        DOCKER_IMAGE = 'francobertoldimariglio/tu-proyecto-backend'
+        DOCKER_IMAGE = 'francobertoldimariglio/backend'
         DOCKER_TAG = "${BUILD_NUMBER}"
     }
 
@@ -82,18 +82,29 @@ pipeline {
 
     post {
         always {
-            sh 'docker logout'
-            // Limpieza de imágenes
-            sh """
-                docker rmi ${DOCKER_IMAGE}:${DOCKER_TAG} || true
-                docker rmi ${DOCKER_IMAGE}:latest || true
-            """
+            steps {
+                script {
+                    sh 'docker logout'
+                    sh """
+                        docker rmi ${DOCKER_IMAGE}:${DOCKER_TAG} || true
+                        docker rmi ${DOCKER_IMAGE}:latest || true
+                    """
+                }
+            }
         }
         success {
-            echo '✅ Pipeline ejecutado exitosamente'
+            steps {
+                script {
+                    echo '✅ Pipeline ejecutado exitosamente'
+                }
+            }
         }
         failure {
-            echo '❌ El pipeline ha fallado'
+            steps {
+                script {
+                    echo '❌ El pipeline ha fallado'
+                }
+            }
         }
     }
 }
