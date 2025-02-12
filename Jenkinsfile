@@ -82,7 +82,7 @@ pipeline {
 
     post {
         always {
-            script {
+            node {  // 🔥 Envolver `sh` en `node {}`
                 sh 'docker logout'
                 sh """
                     docker rmi ${DOCKER_IMAGE}:${DOCKER_TAG} || true
@@ -91,14 +91,10 @@ pipeline {
             }
         }
         success {
-            script {
-                echo '✅ Pipeline ejecutado exitosamente'
-            }
+            echo '✅ Pipeline ejecutado exitosamente'
         }
         failure {
-            script {
-                echo '❌ El pipeline ha fallado'
-            }
+            echo '❌ El pipeline ha fallado'
         }
     }
 }
