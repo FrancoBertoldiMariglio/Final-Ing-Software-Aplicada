@@ -13,8 +13,9 @@ RUN apt-get update && \
     software-properties-common
 
 # Descargar e instalar Filebeat
-RUN curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-7.14.0-amd64.deb && \
-    dpkg -i filebeat-7.14.0-amd64.deb
+RUN ARCH=$(dpkg --print-architecture) && \
+    curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-7.14.0-${ARCH}.deb && \
+    dpkg -i filebeat-7.14.0-${ARCH}.deb
 
 # Copiar configuración de Filebeat
 COPY filebeat.yml /etc/filebeat/filebeat.yml
