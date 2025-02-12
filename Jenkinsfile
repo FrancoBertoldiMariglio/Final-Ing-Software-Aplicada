@@ -82,28 +82,22 @@ pipeline {
 
     post {
         always {
-            steps {
-                script {
-                    sh 'docker logout'
-                    sh """
-                        docker rmi ${DOCKER_IMAGE}:${DOCKER_TAG} || true
-                        docker rmi ${DOCKER_IMAGE}:latest || true
-                    """
-                }
+            script {
+                sh 'docker logout'
+                sh """
+                    docker rmi ${DOCKER_IMAGE}:${DOCKER_TAG} || true
+                    docker rmi ${DOCKER_IMAGE}:latest || true
+                """
             }
         }
         success {
-            steps {
-                script {
-                    echo '✅ Pipeline ejecutado exitosamente'
-                }
+            script {
+                echo '✅ Pipeline ejecutado exitosamente'
             }
         }
         failure {
-            steps {
-                script {
-                    echo '❌ El pipeline ha fallado'
-                }
+            script {
+                echo '❌ El pipeline ha fallado'
             }
         }
     }
