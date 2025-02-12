@@ -82,7 +82,7 @@ pipeline {
 
     post {
         always {
-            node {  // 🔥 Envolver `sh` en `node {}`
+            node {
                 sh 'docker logout'
                 sh """
                     docker rmi ${DOCKER_IMAGE}:${DOCKER_TAG} || true
