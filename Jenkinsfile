@@ -82,13 +82,11 @@ pipeline {
 
     post {
         always {
-            node {
-                sh 'docker logout'
-                sh """
-                    docker rmi ${DOCKER_IMAGE}:${DOCKER_TAG} || true
-                    docker rmi ${DOCKER_IMAGE}:latest || true
-                """
-            }
+            sh 'docker logout'
+            sh """
+                docker rmi ${DOCKER_IMAGE}:${DOCKER_TAG} || true
+                docker rmi ${DOCKER_IMAGE}:latest || true
+            """
         }
         success {
             echo '✅ Pipeline ejecutado exitosamente'
