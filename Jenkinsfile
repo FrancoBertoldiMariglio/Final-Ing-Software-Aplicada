@@ -6,6 +6,9 @@ pipeline {
         DOCKER_IMAGE = 'elk-backend'
         DOCKER_TAG = "${BUILD_NUMBER}"
         PUPPETEER_SKIP_DOWNLOAD = 'true'
+        // TestContainers configuration
+        TESTCONTAINERS_RYUK_DISABLED = 'true'
+        DOCKER_HOST = 'unix:///var/run/docker.sock'
     }
 
     stages {
@@ -22,26 +25,9 @@ pipeline {
                         export PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
                         chmod +x mvnw
-                        ./mvnw clean install
+                        ./mvnw clean install -DskipTests
                     '''
                 }
-            }
-        }
-
-        stage('Verify Dependencies') {
-            steps {
-                sh '''
-                    echo "Verifying Elasticsearch connection..."
-                    until curl -s http://elasticsearch:9201 > /dev/null; do
-                        sleep 5
-                        echo "Waiting for Elasticsearch..."
-                    done
-                    echo "Verifying MySQL connection..."
-                    until mysqladmin ping -h mysql -P 3307 --silent; do
-                        sleep 5
-                        echo "Waiting for MySQL..."
-                    done
-                '''
             }
         }
 
@@ -52,8 +38,14 @@ pipeline {
             steps {
                 dir('backend') {
                     sh '''
-                        chmod +x mvnw
-                        ./mvnw clean test
+                        # Ensure Docker socket is accessible
+                        chmod 666 /var/run/docker.sock || true
+
+                        # Run tests with TestContainers configuration
+                        ./mvnw test \
+                            -Dtestcontainers.reuse.enable=true \
+                            -Dspring.datasource.url=jdbc:mysql://mysql:3307/biblioteca \
+                            -Dspring.elasticsearch.uris=http://elasticsearch:9201
                     '''
                 }
             }
