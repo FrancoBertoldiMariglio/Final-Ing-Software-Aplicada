@@ -3,6 +3,8 @@ pipeline {
 
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub')
+        DOCKER_REGISTRY = 'docker.io'
+        DOCKER_NAMESPACE = 'francobertoldimariglio'
         DOCKER_IMAGE = 'elk-backend'
         DOCKER_TAG = "${BUILD_NUMBER}"
         PUPPETEER_SKIP_DOWNLOAD = 'true'
@@ -91,8 +93,8 @@ pipeline {
                         docker stop backend || true
                         docker rm backend || true
 
-                        docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} .
-                        docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest
+                        docker build -t ${DOCKER_REGISTRY}/${DOCKER_NAMESPACE}/${DOCKER_IMAGE}:${DOCKER_TAG} .
+                        docker tag ${DOCKER_REGISTRY}/${DOCKER_NAMESPACE}/${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_REGISTRY}/${DOCKER_NAMESPACE}/${DOCKER_IMAGE}:latest
                     """
                 }
             }
@@ -107,8 +109,8 @@ pipeline {
             steps {
                 sh '''
                     echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin
-                    docker push ${DOCKER_IMAGE}:${DOCKER_TAG}
-                    docker push ${DOCKER_IMAGE}:latest
+                    docker push ${DOCKER_REGISTRY}/${DOCKER_NAMESPACE}/${DOCKER_IMAGE}:${DOCKER_TAG}
+                    docker push ${DOCKER_REGISTRY}/${DOCKER_NAMESPACE}/${DOCKER_IMAGE}:latest
                 '''
             }
         }
@@ -127,8 +129,8 @@ pipeline {
                             docker rm backend || true
 
                             # Force remove images
-                            docker rmi -f ${DOCKER_IMAGE}:${DOCKER_TAG} || true
-                            docker rmi -f ${DOCKER_IMAGE}:latest || true
+                            docker rmi -f ${DOCKER_REGISTRY}/${DOCKER_NAMESPACE}/${DOCKER_IMAGE}:${DOCKER_TAG} || true
+                            docker rmi -f ${DOCKER_REGISTRY}/${DOCKER_NAMESPACE}/${DOCKER_IMAGE}:latest || true
                         '''
                     }
                 }
