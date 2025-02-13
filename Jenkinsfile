@@ -9,6 +9,8 @@ pipeline {
         // TestContainers configuration
         TESTCONTAINERS_RYUK_DISABLED = 'true'
         DOCKER_HOST = 'unix:///var/run/docker.sock'
+        PATH = "/var/jenkins_home/workspace/pipeline-backend/backend/target/node:${env.PATH}"
+        NODE_PATH = "/var/jenkins_home/workspace/pipeline-backend/backend/target/node/node_modules"
     }
 
     stages {
@@ -58,6 +60,13 @@ pipeline {
             steps {
                 dir('backend') {
                     sh '''
+                        # Ensure npm is in PATH
+                        export PATH="/var/jenkins_home/workspace/pipeline-backend/backend/target/node:${PATH}"
+                        export NODE_PATH="/var/jenkins_home/workspace/pipeline-backend/backend/target/node/node_modules"
+
+                        # Verify npm installation
+                        which npm || echo "npm not found in PATH: $PATH"
+
                         export PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
                         npm install
                         npm run cypress:run
