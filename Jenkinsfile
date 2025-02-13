@@ -15,10 +15,11 @@ pipeline {
                     sh '''
                         # Install Chromium for ARM64
                         apt-get update
-                        apt-get install -y chromium chromium-browser
+                        apt-get install -y chromium
 
                         # Set Chrome binary path for Puppeteer
                         export CHROME_BIN=/usr/bin/chromium
+                        export PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
                         chmod +x mvnw
                         ./mvnw clean install
@@ -31,12 +32,12 @@ pipeline {
             steps {
                 sh '''
                     echo "Verifying Elasticsearch connection..."
-                    until curl -s http://elasticsearch:9200 > /dev/null; do
+                    until curl -s http://elasticsearch:9201 > /dev/null; do
                         sleep 5
                         echo "Waiting for Elasticsearch..."
                     done
                     echo "Verifying MySQL connection..."
-                    until mysqladmin ping -h mysql --silent; do
+                    until mysqladmin ping -h mysql -P 3307 --silent; do
                         sleep 5
                         echo "Waiting for MySQL..."
                     done
@@ -82,6 +83,10 @@ pipeline {
             steps {
                 dir('backend') {
                     sh """
+                        # Stop and remove existing container if running
+                        docker stop backend || true
+                        docker rm backend || true
+
                         docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} .
                         docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest
                     """
@@ -112,8 +117,14 @@ pipeline {
                     catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
                         sh '''
                             docker logout || true
-                            docker rmi ${DOCKER_IMAGE}:${DOCKER_TAG} || true
-                            docker rmi ${DOCKER_IMAGE}:latest || true
+
+                            # Stop running container before removing images
+                            docker stop backend || true
+                            docker rm backend || true
+
+                            # Force remove images
+                            docker rmi -f ${DOCKER_IMAGE}:${DOCKER_TAG} || true
+                            docker rmi -f ${DOCKER_IMAGE}:latest || true
                         '''
                     }
                 }
