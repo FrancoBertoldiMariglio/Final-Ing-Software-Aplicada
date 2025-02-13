@@ -3,8 +3,9 @@ pipeline {
 
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub')
-        DOCKER_IMAGE = 'francobertoldimariglio/backend'
+        DOCKER_IMAGE = 'elk-backend'
         DOCKER_TAG = "${BUILD_NUMBER}"
+        PUPPETEER_SKIP_DOWNLOAD = 'true'
     }
 
     stages {
@@ -12,6 +13,13 @@ pipeline {
             steps {
                 dir('backend') {
                     sh '''
+                        # Install Chromium for ARM64
+                        apt-get update
+                        apt-get install -y chromium chromium-browser
+
+                        # Set Chrome binary path for Puppeteer
+                        export CHROME_BIN=/usr/bin/chromium
+
                         chmod +x mvnw
                         ./mvnw clean install
                     '''
@@ -37,6 +45,9 @@ pipeline {
         }
 
         stage('Unit Tests') {
+            environment {
+                CHROME_BIN = '/usr/bin/chromium'
+            }
             steps {
                 dir('backend') {
                     sh '''
@@ -48,9 +59,13 @@ pipeline {
         }
 
         stage('Integration Tests') {
+            environment {
+                CHROME_BIN = '/usr/bin/chromium'
+            }
             steps {
                 dir('backend') {
                     sh '''
+                        export PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
                         npm install
                         npm run cypress:run
                     '''
